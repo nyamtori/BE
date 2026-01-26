@@ -1,4 +1,17 @@
 HELP.md
+
+### Spring Config ###
+application.yml
+
+### Logs ###
+*.log
+logs/
+
+### Environment variables ###
+.env
+.env.*
+
+
 .gradle
 build/
 !gradle/wrapper/gradle-wrapper.jar
