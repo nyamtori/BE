@@ -26,4 +26,20 @@ public class Ingredient extends BaseTimeEntity {
     private String imgUrl;
 
     private String category;
+
+    public void applyCreate(
+            String ingredientName,
+            LocalDate ingredientDate,
+            String ingredientEtc,
+            String imgUrl,
+            String category
+    ) {
+        this.ingredientName = ingredientName;
+        this.ingredientDate = ingredientDate;
+        this.ingredientEtc = ingredientEtc;
+        this.imgUrl = imgUrl;
+        this.category = category;
+    }
+
+
 }
