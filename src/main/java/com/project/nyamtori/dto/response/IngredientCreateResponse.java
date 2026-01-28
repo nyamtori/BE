@@ -6,5 +6,6 @@ public record IngredientCreateResponse (
         String ingredientDate,
         String ingredientEtc,
         String imgUrl,
+        int amount,
         String category
 ) {}

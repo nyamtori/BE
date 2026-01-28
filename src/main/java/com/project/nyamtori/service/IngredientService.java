@@ -29,6 +29,11 @@ public class IngredientService {
             category = "ETC";
         }
 
+        int amount = req.getAmount();
+        if (amount < 0) {
+            throw new IllegalArgumentException("수량은 1개 이상이어야 합니다.");
+        }
+
         // 3. 엔티티 생성
         Ingredient ingredient = new Ingredient();
         ingredient.applyCreate(
@@ -36,6 +41,7 @@ public class IngredientService {
                 req.getIngredientDate(),
                 req.getIngredientEtc(),
                 req.getImgUrl(),
+                req.getAmount(),
                 category
         );
 
@@ -47,6 +53,7 @@ public class IngredientService {
                 saved.getIngredientDate().toString(),
                 saved.getIngredientEtc(),
                 saved.getImgUrl(),
+                saved.getAmount(),
                 saved.getCategory()
         );
     }
