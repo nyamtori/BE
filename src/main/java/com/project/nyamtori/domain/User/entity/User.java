@@ -1,4 +1,4 @@
-package com.project.nyamtori.domain;
+package com.project.nyamtori.domain.User.entity;
 
 import com.project.nyamtori.common.BaseTimeEntity;
 import jakarta.persistence.Column;
