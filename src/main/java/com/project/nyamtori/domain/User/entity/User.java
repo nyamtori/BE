@@ -1,11 +1,9 @@
 package com.project.nyamtori.domain.User.entity;
 
 import com.project.nyamtori.common.BaseTimeEntity;
-import jakarta.persistence.Column;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 
+@Entity
 public class User extends BaseTimeEntity {
 
     @Id
