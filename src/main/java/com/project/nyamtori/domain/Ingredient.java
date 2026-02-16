@@ -27,7 +27,7 @@ public class Ingredient extends BaseTimeEntity {
 
     private int amount;
 
-    private String category;
+    private String location;
 
     public void applyCreate(
             String ingredientName,
@@ -35,14 +35,14 @@ public class Ingredient extends BaseTimeEntity {
             String ingredientEtc,
             String imgUrl,
             int amount,
-            String category
+            String location
     ) {
         this.ingredientName = ingredientName;
         this.ingredientDate = ingredientDate;
         this.ingredientEtc = ingredientEtc;
         this.imgUrl = imgUrl;
         this.amount = amount;
-        this.category = category;
+        this.location = location;
     }
 
 

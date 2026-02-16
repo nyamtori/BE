@@ -22,7 +22,7 @@ public class IngredientCreateRequest {
 
     private int amount;
 
-    @NotBlank(message = "카테고리를 선택해주세요.")
-    private String category;
+    @NotBlank(message = "보관 방법을 선택해주세요.")
+    private String location;
 
 }

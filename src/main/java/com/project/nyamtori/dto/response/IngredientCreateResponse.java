@@ -7,5 +7,5 @@ public record IngredientCreateResponse (
         String ingredientEtc,
         String imgUrl,
         int amount,
-        String category
+        String location
 ) {}

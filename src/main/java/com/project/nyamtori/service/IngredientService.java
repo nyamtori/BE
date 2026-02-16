@@ -3,8 +3,10 @@ package com.project.nyamtori.service;
 import com.project.nyamtori.dto.request.IngredientCreateRequest;
 import com.project.nyamtori.domain.Ingredient;
 import com.project.nyamtori.dto.response.IngredientCreateResponse;
+import com.project.nyamtori.dto.response.IngredientDetailResponse;
+import com.project.nyamtori.dto.response.IngredientListResponse;
 import com.project.nyamtori.repository.IngredientRepository;
-import jakarta.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -18,23 +20,11 @@ public class IngredientService {
 
     public IngredientCreateResponse createIngredient(IngredientCreateRequest req) {
 
-        // 1. 중복 이름 방지
-        if (ingredientRepository.existsByIngredientName(req.getIngredientName())) {
-            throw new IllegalArgumentException("이미 존재하는 재료입니다.");
-        }
-
-        // 2. 카테고리 항목 없으면 ETC 처리
-        String category = req.getCategory();
-        if (category == null || category.isBlank()) {
-            category = "ETC";
-        }
-
         int amount = req.getAmount();
         if (amount < 0) {
             throw new IllegalArgumentException("수량은 1개 이상이어야 합니다.");
         }
 
-        // 3. 엔티티 생성
         Ingredient ingredient = new Ingredient();
         ingredient.applyCreate(
                 req.getIngredientName(),
@@ -42,7 +32,7 @@ public class IngredientService {
                 req.getIngredientEtc(),
                 req.getImgUrl(),
                 req.getAmount(),
-                category
+                req.getLocation()
         );
 
         Ingredient saved = ingredientRepository.save(ingredient);
@@ -54,8 +44,24 @@ public class IngredientService {
                 saved.getIngredientEtc(),
                 saved.getImgUrl(),
                 saved.getAmount(),
-                saved.getCategory()
+                saved.getLocation()
         );
     }
 
+    // 재료 단건 조회
+    @Transactional(readOnly = true)
+    public IngredientDetailResponse readIngredient(Long ingredientId) {
+        Ingredient ingredient = ingredientRepository.findById(ingredientId)
+                .orElseThrow(()-> new IllegalArgumentException("존재하지 않는 재료입니다."));
+
+        return IngredientDetailResponse.from(ingredient);
+    }
+
+    // 재료 목록 조회 -> 리스트
+    @Transactional(readOnly = true)
+    public IngredientListResponse readIngredientList() {
+        return ingredientRepository.findAll().stream()
+                .map(IngredientListResponse::from)
+                .toList();
+    }
 }
