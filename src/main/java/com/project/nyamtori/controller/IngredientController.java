@@ -72,4 +72,14 @@ public class IngredientController {
 
         return ResponseEntity.ok(response);
     }
+
+    @DeleteMapping("/{ingredientId}")
+    @Operation(
+            summary = "재료 삭제",
+            description = "재료를 삭제합니다."
+    )
+    public ResponseEntity<Void> deleteIngredient(@PathVariable Long ingredientId) {
+        ingredientService.deleteIngredient(ingredientId);
+        return ResponseEntity.noContent().build();
+    }
 }

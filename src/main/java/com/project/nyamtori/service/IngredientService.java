@@ -90,4 +90,11 @@ public class IngredientService {
         return IngredientDetailResponse.from(ingredient);
     }
 
+    public void deleteIngredient(Long ingredientId) {
+        Ingredient ingredient = ingredientRepository.findById(ingredientId)
+                .orElseThrow(()-> new IllegalArgumentException("해당 재료를 찾을 수 없습니다."));
+
+        ingredientRepository.delete(ingredient);
+    }
+
 }
