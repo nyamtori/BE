@@ -2,6 +2,7 @@ package com.project.nyamtori.service;
 
 import com.project.nyamtori.dto.request.IngredientCreateRequest;
 import com.project.nyamtori.domain.Ingredient;
+import com.project.nyamtori.dto.request.IngredientUpdateRequest;
 import com.project.nyamtori.dto.response.IngredientCreateResponse;
 import com.project.nyamtori.dto.response.IngredientDetailResponse;
 import com.project.nyamtori.dto.response.IngredientListResponse;
@@ -10,6 +11,9 @@ import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+
+import java.time.LocalDate;
+import java.util.List;
 
 @Service
 @Slf4j
@@ -59,9 +63,35 @@ public class IngredientService {
 
     // 재료 목록 조회 -> 리스트
     @Transactional(readOnly = true)
-    public IngredientListResponse readIngredientList() {
+    public List<IngredientListResponse> readIngredientList() {
         return ingredientRepository.findAll().stream()
                 .map(IngredientListResponse::from)
                 .toList();
     }
+
+    // 부분 수정
+    public IngredientDetailResponse updateIngredient (
+            Long ingredientId,
+            IngredientUpdateRequest request
+    ) {
+        Ingredient ingredient = ingredientRepository.findById(ingredientId)
+                .orElseThrow(() -> new IllegalArgumentException("해당 재료가 없습니다."));
+
+        LocalDate parsedDate = null;
+        if (request.getIngredientDate() != null && !request.getIngredientDate().isBlank()) {
+            parsedDate = LocalDate.parse(request.getIngredientDate());
+        }
+
+        ingredient.update(
+                request.getIngredientName(),
+                parsedDate,
+                request.getIngredientEtc(),
+                request.getImgUrl(),
+                request.getAmount(),
+                request.getLocation()
+        );
+
+        return IngredientDetailResponse.from(ingredient);
+    }
+
 }
