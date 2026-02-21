@@ -77,14 +77,10 @@ public class IngredientService {
         Ingredient ingredient = ingredientRepository.findById(ingredientId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 재료가 없습니다."));
 
-        LocalDate parsedDate = null;
-        if (request.getIngredientDate() != null && !request.getIngredientDate().isBlank()) {
-            parsedDate = LocalDate.parse(request.getIngredientDate());
-        }
 
         ingredient.update(
                 request.getIngredientName(),
-                parsedDate,
+                request.getIngredientDate(),
                 request.getIngredientEtc(),
                 request.getImgUrl(),
                 request.getAmount(),

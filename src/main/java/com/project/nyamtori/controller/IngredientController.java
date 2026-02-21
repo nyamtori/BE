@@ -51,7 +51,7 @@ public class IngredientController {
 
     @GetMapping
     @Operation(
-            summary = "재로 목록 조회",
+            summary = "재료 목록 조회",
             description = "등록된 재료들을 전체 조회합니다."
     )
     public ResponseEntity<List<IngredientListResponse>> readAllIngredients() {
