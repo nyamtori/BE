@@ -1,5 +1,6 @@
 package com.project.nyamtori.domain;
 
+import com.project.nyamtori.domain.User.entity.User;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
