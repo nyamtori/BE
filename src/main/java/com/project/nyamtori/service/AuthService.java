@@ -32,9 +32,10 @@ public class AuthService {
                     );
                 });
 
-        String jwt = jwtUtil.createToken(user.getUserId());
+        String accessToken = jwtUtil.createAccessToken(user.getUserId());
+        String refreshToken = jwtUtil.createRefreshToken(user.getUserId());
 
-        return new LoginResponse(jwt, user);
+        return new LoginResponse(accessToken,refreshToken, user);
 
     }
 

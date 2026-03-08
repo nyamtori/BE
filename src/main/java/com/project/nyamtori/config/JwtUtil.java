@@ -17,7 +17,10 @@ public class JwtUtil {
     private String secretKey;
 
     @Value("${jwt.access-token-expire-time}")
-    private long expireTime;
+    private long accessExpireTime;
+
+    @Value("${jwt.refresh-token-expire-time}")
+    private long refreshExpireTime;
 
     private SecretKey key;
 
@@ -26,15 +29,23 @@ public class JwtUtil {
         this.key=Keys.hmacShaKeyFor(secretKey.getBytes());
     }
 
-    public String createToken(Long userId){
+    public String createAccessToken(Long userId){
         Date now = new Date();
-        Date expire = new Date(now.getTime()+expireTime);
+        Date expire = new Date(now.getTime()+accessExpireTime);
 
         return Jwts.builder()
                 .subject(userId.toString())
                 .issuedAt(now)
                 .expiration(expire)
                 .signWith(key,Jwts.SIG.HS256)
+                .compact();
+    }
+
+    public String createRefreshToken(Long userId){
+        return Jwts.builder()
+                .subject(String.valueOf(userId))
+                .expiration(new Date(System.currentTimeMillis()+refreshExpireTime))
+                .signWith(key)
                 .compact();
     }
 

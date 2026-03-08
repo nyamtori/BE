@@ -1,24 +1,25 @@
 package com.project.nyamtori.controller;
 
+import com.project.nyamtori.config.JwtUtil;
+import com.project.nyamtori.dto.request.RefreshRequest;
 import com.project.nyamtori.dto.response.LoginResponse;
+import com.project.nyamtori.dto.response.TokenResponse;
 import com.project.nyamtori.service.AuthService;
 import com.project.nyamtori.service.KakaoService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/v1/auth/oauth/kakao")
+@RequestMapping("/api/v1/auth")
 @RequiredArgsConstructor
-public class KakaoAuthController {
+public class AuthController {
 
     private final KakaoService kakaoService;
     private final AuthService authService;
+    private final JwtUtil jwtUtil;
 
-    @GetMapping("/login")
+    @GetMapping("/oauth/kakao/login")
     public ResponseEntity<?> redirectToKakaoLogin() {
 
         String kakaoAuthUrl =
@@ -31,11 +32,23 @@ public class KakaoAuthController {
                 .build();
     }
 
-    @GetMapping("/callback")
+    @GetMapping("/oauth/kakao/callback")
     public ResponseEntity<LoginResponse> kakaoCallback(@RequestParam String code) {
 
         LoginResponse loginResponse = authService.kakaoLogin(code);
 
         return ResponseEntity.ok(loginResponse);
+    }
+
+    @PostMapping("/refresh")
+    public ResponseEntity<TokenResponse> refreshToken(
+            @RequestBody RefreshRequest request
+    ){
+
+        Long userId = jwtUtil.getUserId(request.refreshToken());
+
+        String newAccessToken = jwtUtil.createAccessToken(userId);
+
+        return ResponseEntity.ok(new TokenResponse(newAccessToken));
     }
 }
