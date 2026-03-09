@@ -2,6 +2,7 @@ package com.project.nyamtori.controller;
 
 import com.project.nyamtori.dto.request.RecipeGenerateRequest;
 import com.project.nyamtori.dto.response.RecipeJobResponse;
+import com.project.nyamtori.dto.response.RecipeStatusResponse;
 import com.project.nyamtori.service.RecipeAIService;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
@@ -24,6 +25,14 @@ public class RecipeController {
     )public RecipeJobResponse generateRecipe(@RequestBody RecipeGenerateRequest request){
         Long jobId=recipeAIService.createRecipeJob(request);
         return new RecipeJobResponse(jobId.toString());
+    }
+
+    @GetMapping("/recipe-jobs/{jobId}/status")
+    @Operation(
+            summary = "AI 레시피 생성 상태 조회",
+            description = "생성시킨 레시피의 상태를 조회합니다"
+    )public RecipeStatusResponse getStatus(@PathVariable Long jobId){
+        return recipeAIService.getJobStatus(jobId);
     }
 
 }

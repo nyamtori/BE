@@ -30,4 +30,16 @@ public class WebClientConfig {
                 .baseUrl(apiBaseUrl)
                 .build();
     }
+
+    @Bean
+    public WebClient geminiWebClient(
+            @Value("${gemini.url}") String baseUrl,
+            @Value("${gemini.api-key}") String apiKey
+    ){
+        return  WebClient.builder()
+                .baseUrl(baseUrl)
+                .defaultHeader("x-goog-api-key",apiKey)
+                .defaultHeader("Content-Type","application/json")
+                .build();
+    }
 }

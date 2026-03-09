@@ -25,6 +25,9 @@ public class RecipeJob extends BaseEntity {
     @Column(columnDefinition = "Text")
     private String ingredientsJsons;
 
+    @Column(columnDefinition = "Text")
+    private String result;
+
     private Integer cookTime;
 
 }

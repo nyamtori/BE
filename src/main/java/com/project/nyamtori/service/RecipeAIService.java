@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.project.nyamtori.domain.Ingredient;
 import com.project.nyamtori.domain.RecipeJob;
 import com.project.nyamtori.dto.request.RecipeGenerateRequest;
+import com.project.nyamtori.dto.response.RecipeStatusResponse;
 import com.project.nyamtori.enums.JobStatus;
 import com.project.nyamtori.repository.IngredientRepository;
 import com.project.nyamtori.repository.RecipeJobRepository;
@@ -42,7 +43,23 @@ public class RecipeAIService {
                 .map(Ingredient::getIngredientName)
                 .toList();
 
-        String recipe = geminiClient.generateRecipe(names);
+        String recipe = geminiClient.generateRecipe(names);;
+
+        job.setResult(recipe);
+
+        job.setStatus(JobStatus.COMPLETE);
+        recipeJobRepository.save(job);
+
         return saved.getId();
+    }
+
+    public RecipeStatusResponse getJobStatus(Long jobId){
+        RecipeJob job= recipeJobRepository.findById(jobId)
+                .orElseThrow(()-> new RuntimeException("job 없음"));
+
+        return new RecipeStatusResponse(
+                job.getStatus(),
+                job.getResult()
+        );
     }
 }

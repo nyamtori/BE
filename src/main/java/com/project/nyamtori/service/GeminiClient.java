@@ -1,6 +1,10 @@
 package com.project.nyamtori.service;
 
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -9,19 +13,12 @@ import java.util.List;
 import java.util.Map;
 
 @Service
+@RequiredArgsConstructor
 public class GeminiClient {
-    private final WebClient webClient;
 
-    public GeminiClient(
-            @Value("${gemini.url}") String baseUrl,
-            @Value("${gemini.api-key}") String apiKey
-    ){
-        this.webClient=WebClient.builder()
-                .baseUrl(baseUrl)
-                .defaultHeader("x-goog-api-key",apiKey)
-                .defaultHeader("Content-Type","application/json")
-                .build();
-    }
+    private final WebClient geminiWebClient;
+
+    private final ObjectMapper objectMapper;
 
     public String generateRecipe(List<String> ingredients){
 
@@ -53,11 +50,35 @@ public class GeminiClient {
 
         );
 
-        return webClient.post()
+        String response = geminiWebClient.post()
                 .bodyValue(body)
                 .retrieve()
                 .bodyToMono(String.class)
                 .block();
+
+        try{
+            JsonNode root = objectMapper.readTree(response);
+
+
+            String text = root
+                    .path("candidates")
+                    .get(0)
+                    .path("content")
+                    .path("parts")
+                    .get(0)
+                    .path("text")
+                    .asText();
+
+
+            text = text.replace("```json", "")
+                    .replace("```", "")
+                    .trim();
+
+            return text;
+
+        } catch (Exception e) {
+            throw new RuntimeException("Gemini 응답 파싱 실패");
+        }
     }
 
 }
