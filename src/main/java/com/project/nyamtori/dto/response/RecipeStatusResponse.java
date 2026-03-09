@@ -8,6 +8,6 @@ import lombok.Getter;
 @AllArgsConstructor
 public class RecipeStatusResponse {
     private JobStatus status;
-    private String result;
+    private Object result;
 
 }

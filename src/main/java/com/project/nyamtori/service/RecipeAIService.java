@@ -57,9 +57,18 @@ public class RecipeAIService {
         RecipeJob job= recipeJobRepository.findById(jobId)
                 .orElseThrow(()-> new RuntimeException("job 없음"));
 
+        Object result = null;
+
+        if(job.getResult() != null){
+            try{
+                result = objectMapper.readValue(job.getResult(), Object.class);
+            }catch(Exception e){
+                result = job.getResult();
+            }
+        }
         return new RecipeStatusResponse(
                 job.getStatus(),
-                job.getResult()
+                result
         );
     }
 }
