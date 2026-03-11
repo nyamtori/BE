@@ -4,9 +4,11 @@ import com.project.nyamtori.common.BaseTimeEntity;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Entity
 @Getter
+@Setter
 @NoArgsConstructor
 public class Recipe extends BaseTimeEntity {
     @Id

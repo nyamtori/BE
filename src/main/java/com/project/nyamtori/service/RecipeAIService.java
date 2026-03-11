@@ -3,19 +3,27 @@ package com.project.nyamtori.service;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.project.nyamtori.domain.Ingredient;
+import com.project.nyamtori.domain.Recipe;
+import com.project.nyamtori.domain.RecipeIngredient;
 import com.project.nyamtori.domain.RecipeJob;
 import com.project.nyamtori.dto.request.RecipeGenerateRequest;
 import com.project.nyamtori.dto.response.GetRecipesResponse;
+import com.project.nyamtori.dto.response.RecipeAIResponse;
+import com.project.nyamtori.dto.response.RecipeResponse;
 import com.project.nyamtori.dto.response.RecipeStatusResponse;
 import com.project.nyamtori.enums.JobStatus;
 import com.project.nyamtori.repository.IngredientRepository;
+import com.project.nyamtori.repository.RecipeIngredientRepository;
 import com.project.nyamtori.repository.RecipeJobRepository;
+import com.project.nyamtori.repository.RecipeRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -25,6 +33,8 @@ public class RecipeAIService {
     private final ObjectMapper objectMapper;
     private final GeminiClient geminiClient;
     private final IngredientRepository ingredientRepository;
+    private final RecipeRepository recipeRepository;
+    private final RecipeIngredientRepository recipeIngredientRepository;
 
     public Long createRecipeJob(RecipeGenerateRequest request){
         RecipeJob job = new RecipeJob();
@@ -53,9 +63,42 @@ public class RecipeAIService {
                 .map(Ingredient::getIngredientName)
                 .toList();
 
-        String recipe = geminiClient.generateRecipe(names);;
 
-        job.setResult(recipe);
+        String recipeJson = geminiClient.generateRecipe(names);
+
+        RecipeAIResponse aiResponse;
+
+        try {
+            aiResponse = objectMapper.readValue(recipeJson, RecipeAIResponse.class);
+        } catch (Exception e) {
+            throw new RuntimeException("AI 레시피 파싱 실패", e);
+        }
+
+        for (RecipeAIResponse.RecipeItem item : aiResponse.getRecipes()) {
+
+            Recipe recipe = new Recipe();
+            recipe.setFood(item.title());
+            recipe.setRecipe(String.join("\n", item.steps()));
+            recipe.setCookTime(request.getCookTime());
+
+            recipeRepository.save(recipe);
+
+            for (RecipeAIResponse.IngredientItem ingredientItem : item.ingredients()) {
+
+                Ingredient ingredient = ingredientRepository
+                        .findByIngredientName(ingredientItem.name())
+                        .orElseThrow();
+
+                RecipeIngredient recipeIngredient =
+                        new RecipeIngredient(recipe, ingredient, ingredientItem.amount());
+
+                recipeIngredientRepository.save(recipeIngredient);
+            }
+
+
+        }
+
+        job.setResult(recipeJson);
         job.setStatus(JobStatus.COMPLETE);
 
         recipeJobRepository.save(job);
@@ -103,32 +146,54 @@ public class RecipeAIService {
     }
 
     public GetRecipesResponse getRecipesList() {
-        List<RecipeJob> jobs = recipeJobRepository.findAll();
+        List<Recipe> recipes = recipeRepository.findAll();
 
-        List<GetRecipesResponse.RecipeInfo> recipes = new ArrayList<>();
+        List<GetRecipesResponse.RecipeInfo> result = new ArrayList<>();
 
-        for (RecipeJob job : jobs) {
-            if (job.getResult() != null) {
-                try {
-                    JsonNode root = objectMapper.readTree(job.getResult());
-                    String title = root.path("title").asText();
-                    Integer cookTime = job.getCookTime();
-
-                    recipes.add(
-                            new GetRecipesResponse.RecipeInfo(
-                                    job.getId(),
-                                    title,
-                                    cookTime,
-                                    false // 찜 기능 생성 전
-                            )
-                    );
-                } catch (Exception e) {
-                    throw new RuntimeException("레시피 파싱 실패");
-                }
-            }
-
+        for (Recipe recipe : recipes) {
+            result.add(
+                    new GetRecipesResponse.RecipeInfo(
+                            recipe.getRecipeId(),
+                            recipe.getFood(),
+                            recipe.getCookTime(),
+                            false // 찜 기능 생성 전
+                    )
+            );
         }
 
-        return new GetRecipesResponse(recipes);
+        return new GetRecipesResponse(result);
+    }
+
+    public RecipeResponse recipe(Long recipeId){
+        Recipe recipe = recipeRepository.findById(recipeId)
+                .orElseThrow();
+
+        List<RecipeIngredient> recipeIngredients =
+                recipeIngredientRepository.findByRecipeRecipeId(recipeId);
+
+        List<RecipeResponse.Ingredients> ingredients = new ArrayList<>();
+
+        for(RecipeIngredient ri : recipeIngredients){
+            ingredients.add(
+                    new RecipeResponse.Ingredients(
+                            ri.getIngredient().getIngredientId(),
+                            ri.getIngredient().getIngredientName(),
+                            ri.getAmount()
+                    )
+            );
+        }
+
+        List<String> steps =
+                Arrays.asList(recipe.getRecipe().split("\n"));
+
+        return new RecipeResponse(
+                recipe.getRecipeId(),
+                recipe.getFood(),
+                recipe.getCookTime(),
+                ingredients,
+                steps,
+                false // 찜 기능 생성 전
+        );
+
     }
 }
