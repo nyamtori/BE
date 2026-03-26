@@ -2,9 +2,13 @@ package com.project.nyamtori.service;
 
 import com.project.nyamtori.dto.response.BarcodeLookupResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.awt.image.BufferedImage;
+
 @Service
+@Slf4j
 @RequiredArgsConstructor
 public class BarcodeLookupService {
 
@@ -12,8 +16,9 @@ public class BarcodeLookupService {
     private final OpenFoodFactsClient openFoodFactsClient;
     private final IngredientMatcher ingredientMatcher;
     private final StorageTypeResolver storageTypeResolver;
+    private final OcrService ocrService;
 
-    public BarcodeLookupResponse lookup(String barcode) {
+    public BarcodeLookupResponse lookup(String barcode, BufferedImage expirationImage) {
         ProductInfo productInfo = findProductInfo(barcode);
 
         String ingredientName = ingredientMatcher.extract(
@@ -23,12 +28,13 @@ public class BarcodeLookupService {
 
         String storageType = storageTypeResolver.resolve(ingredientName);
 
+        String expirationDate = ocrService.extractExpirationDate();
         return new BarcodeLookupResponse(
                 barcode,
                 productInfo.productName(),
                 productInfo.manufacturerName(),
                 productInfo.foodType(),
-                productInfo.shelfLife(),
+                expirationDate,
                 ingredientName,
                 storageType
         );

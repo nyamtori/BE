@@ -52,6 +52,9 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-configuration-processor'
 
 	implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
+
+	// OCR
+	implementation 'net.sourceforge.tess4j:tess4j:5.2.0'
 }
 
 tasks.named('test') {
