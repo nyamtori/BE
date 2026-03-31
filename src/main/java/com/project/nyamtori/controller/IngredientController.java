@@ -30,6 +30,7 @@ public class IngredientController {
     private final IngredientService ingredientService;
     private final BarcodeLookupService barcodeLookupService;
 
+
     // 로그인 완성 전
     @PostMapping ("/manual")
     @Operation(
@@ -44,14 +45,14 @@ public class IngredientController {
         return ResponseEntity.ok(ingredientService.createIngredient(req));
     }
 
-    @PostMapping("/lookup")
+    @PostMapping(value = "/lookup", consumes = "multipart/form-data")
     @Operation(
             summary = "바코드 조회 및 유통기한 추출",
             description = "바코드를 인식하고, 유통기한을 이미지에서 추출합니다."
     )
     public ResponseEntity<BarcodeLookupResponse> lookupIngredient(
-            @RequestParam String barcode,
-            @RequestParam("image") MultipartFile image
+            @RequestParam("barcode") String barcode,
+            @RequestPart("image") MultipartFile image
     ) throws IOException {
         BufferedImage img = ImageIO.read(image.getInputStream());
         BarcodeLookupResponse response = barcodeLookupService.lookup(barcode, img);

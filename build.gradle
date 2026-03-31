@@ -55,6 +55,7 @@ dependencies {
 
 	// OCR
 	implementation 'net.sourceforge.tess4j:tess4j:5.2.0'
+	implementation 'org.openpnp:opencv:4.7.0-0'
 }
 
 tasks.named('test') {
