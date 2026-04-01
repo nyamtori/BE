@@ -2,18 +2,23 @@ package com.project.nyamtori.controller;
 
 import com.project.nyamtori.dto.request.IngredientCreateRequest;
 import com.project.nyamtori.dto.request.IngredientUpdateRequest;
+import com.project.nyamtori.dto.response.BarcodeLookupResponse;
 import com.project.nyamtori.dto.response.IngredientCreateResponse;
 import com.project.nyamtori.dto.response.IngredientDetailResponse;
 import com.project.nyamtori.dto.response.IngredientListResponse;
+import com.project.nyamtori.service.BarcodeLookupService;
 import com.project.nyamtori.service.IngredientService;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.coyote.Response;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.awt.image.BufferedImage;
+import javax.imageio.ImageIO;
+import java.io.IOException;
 import java.util.List;
 
 @Slf4j
@@ -23,6 +28,8 @@ import java.util.List;
 public class IngredientController {
 
     private final IngredientService ingredientService;
+    private final BarcodeLookupService barcodeLookupService;
+
 
     // 로그인 완성 전
     @PostMapping ("/manual")
@@ -36,6 +43,21 @@ public class IngredientController {
         log.info("[POST] /api/v1/ingredients name={}", req.getIngredientName());
 
         return ResponseEntity.ok(ingredientService.createIngredient(req));
+    }
+
+    @PostMapping(value = "/lookup", consumes = "multipart/form-data")
+    @Operation(
+            summary = "바코드 조회 및 유통기한 추출",
+            description = "바코드를 인식하고, 유통기한을 이미지에서 추출합니다."
+    )
+    public ResponseEntity<BarcodeLookupResponse> lookupIngredient(
+            @RequestParam("barcode") String barcode,
+            @RequestPart("image") MultipartFile image
+    ) throws IOException {
+        BufferedImage img = ImageIO.read(image.getInputStream());
+        BarcodeLookupResponse response = barcodeLookupService.lookup(barcode, img);
+
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping("/{ingredientId}")

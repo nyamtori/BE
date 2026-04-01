@@ -5,7 +5,7 @@ public record BarcodeLookupResponse(
         String productName,
         String manufacturerName,
         String foodType,
-        String shelfLife,
+        String expirationDate,
         String ingredientName,
         String storageType
 ) {
