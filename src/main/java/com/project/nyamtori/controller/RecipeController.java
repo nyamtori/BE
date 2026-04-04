@@ -9,6 +9,7 @@ import com.project.nyamtori.service.RecipeAIService;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 
@@ -41,8 +42,8 @@ public class RecipeController {
     @Operation(
             summary = "레시피 리스트 전체 조회",
             description = "생성된 레시피의 리스트(음식명, 조리 시간, 찜)를 전체 조회합니다."
-    )public GetRecipesResponse getReipes(){
-        return recipeAIService.getRecipesList();
+    )public GetRecipesResponse getReipes(@AuthenticationPrincipal Long kakaoId){
+        return recipeAIService.getRecipesList(kakaoId);
 
     }
 
@@ -51,8 +52,8 @@ public class RecipeController {
     @Operation(
             summary = "단건 레시피 상세 조회",
             description = "단건 레시피의 재료 및 조리 과정을 상세 조회합니다."
-    )public RecipeResponse recipe(@PathVariable Long recipeId){
-        return recipeAIService.recipe(recipeId);
+    )public RecipeResponse recipe(@AuthenticationPrincipal Long kakaoId,@PathVariable Long recipeId){
+        return recipeAIService.recipe(kakaoId,recipeId);
     }
 
 

@@ -2,20 +2,14 @@ package com.project.nyamtori.service;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.project.nyamtori.domain.Ingredient;
-import com.project.nyamtori.domain.Recipe;
-import com.project.nyamtori.domain.RecipeIngredient;
-import com.project.nyamtori.domain.RecipeJob;
+import com.project.nyamtori.domain.*;
 import com.project.nyamtori.dto.request.RecipeGenerateRequest;
 import com.project.nyamtori.dto.response.GetRecipesResponse;
 import com.project.nyamtori.dto.response.RecipeAIResponse;
 import com.project.nyamtori.dto.response.RecipeResponse;
 import com.project.nyamtori.dto.response.RecipeStatusResponse;
 import com.project.nyamtori.enums.JobStatus;
-import com.project.nyamtori.repository.IngredientRepository;
-import com.project.nyamtori.repository.RecipeIngredientRepository;
-import com.project.nyamtori.repository.RecipeJobRepository;
-import com.project.nyamtori.repository.RecipeRepository;
+import com.project.nyamtori.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
@@ -23,6 +17,7 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -35,6 +30,8 @@ public class RecipeAIService {
     private final IngredientRepository ingredientRepository;
     private final RecipeRepository recipeRepository;
     private final RecipeIngredientRepository recipeIngredientRepository;
+    private final UserRepository userRepository;
+    private final LikeRepository likeRepository;
 
     public Long createRecipeJob(RecipeGenerateRequest request){
         RecipeJob job = new RecipeJob();
@@ -145,18 +142,31 @@ public class RecipeAIService {
 
     }
 
-    public GetRecipesResponse getRecipesList() {
+    // 레시피 리스트 전체 조회
+    public GetRecipesResponse getRecipesList(Long kakaoId) {
+        User user = userRepository.findByKakaoId(String.valueOf(kakaoId))
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 유저입니다."));
+
         List<Recipe> recipes = recipeRepository.findAll();
+
+        List<Like> likes = likeRepository.findAllByUser(user);
+
+        Set<Long> likedRecipeIds = likes.stream()
+                .map(like -> like.getRecipe().getRecipeId())
+                .collect(Collectors.toSet());
 
         List<GetRecipesResponse.RecipeInfo> result = new ArrayList<>();
 
         for (Recipe recipe : recipes) {
+
+            boolean liked = likedRecipeIds.contains(recipe.getRecipeId());
+
             result.add(
                     new GetRecipesResponse.RecipeInfo(
                             recipe.getRecipeId(),
                             recipe.getFood(),
                             recipe.getCookTime(),
-                            false // 찜 기능 생성 전
+                            liked
                     )
             );
         }
@@ -164,9 +174,17 @@ public class RecipeAIService {
         return new GetRecipesResponse(result);
     }
 
-    public RecipeResponse recipe(Long recipeId){
+    // 단건 레시피 상세 조회
+    public RecipeResponse recipe(Long kakaoId, Long recipeId){
+
+        User user = userRepository.findByKakaoId(String.valueOf(kakaoId))
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 유저입니다."));
+
+
         Recipe recipe = recipeRepository.findById(recipeId)
                 .orElseThrow();
+
+        boolean liked = likeRepository.existsByUserAndRecipe_RecipeId(user,recipeId);
 
         List<RecipeIngredient> recipeIngredients =
                 recipeIngredientRepository.findByRecipeRecipeId(recipeId);
@@ -192,7 +210,7 @@ public class RecipeAIService {
                 recipe.getCookTime(),
                 ingredients,
                 steps,
-                false // 찜 기능 생성 전
+                liked
         );
 
     }
