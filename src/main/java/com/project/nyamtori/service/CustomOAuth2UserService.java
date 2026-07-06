@@ -10,6 +10,7 @@ import org.springframework.security.oauth2.core.user.DefaultOAuth2User;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 
+import java.util.HashMap;
 import java.util.Map;
 
 @RequiredArgsConstructor
@@ -23,6 +24,10 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
             throws OAuth2AuthenticationException{
         OAuth2User oAuth2User = super.loadUser(userRequest);
 
+        return processUser(oAuth2User);
+    }
+
+    OAuth2User processUser(OAuth2User oAuth2User) {
         Map<String, Object> attributes = oAuth2User.getAttributes();
 
         Long kakaoId = (Long) attributes.get("id");
@@ -42,10 +47,13 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
                         )
                 );
 
+        Map<String, Object> principalAttributes = new HashMap<>(attributes);
+        principalAttributes.put("userId", user.getUserId());
+
         return new DefaultOAuth2User(
                 oAuth2User.getAuthorities(),
-                attributes,
-                "id"
+                principalAttributes,
+                "userId"
         );
     }
 }
