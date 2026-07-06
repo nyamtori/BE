@@ -16,8 +16,6 @@ import java.awt.image.BufferedImage;
 @Slf4j
 public class BarcodeDecoder {
 
-    private final MultiFormatReader reader = new MultiFormatReader();
-
     public String decode(BufferedImage barcodeImage) {
         if (barcodeImage == null) {
             throw new IllegalArgumentException("바코드 이미지가 null입니다.");
@@ -27,7 +25,8 @@ public class BarcodeDecoder {
         BinaryBitmap bitmap = new BinaryBitmap(new HybridBinarizer(source));
 
         try {
-            Result result = reader.decode(bitmap);
+            // MultiFormatReader는 스레드 세이프하지 않아 싱글톤 필드로 공유하면 안 됨
+            Result result = new MultiFormatReader().decode(bitmap);
             return result.getText();
         } catch (NotFoundException e) {
             log.warn("바코드 디코딩 실패: {}", e.getMessage());
