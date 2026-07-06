@@ -88,7 +88,7 @@ public class IngredientController {
     )
     public ResponseEntity<IngredientDetailResponse> updateIngredient(
             @PathVariable Long ingredientId,
-            @RequestBody IngredientUpdateRequest request
+            @Valid @RequestBody IngredientUpdateRequest request
             ) {
         IngredientDetailResponse response = ingredientService.updateIngredient(ingredientId, request);
 

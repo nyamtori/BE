@@ -1,5 +1,6 @@
 package com.project.nyamtori.dto.request;
 
+import com.project.nyamtori.validation.ValidStorageLocation;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
@@ -23,6 +24,7 @@ public class IngredientCreateRequest {
     private int amount;
 
     @NotBlank(message = "보관 방법을 선택해주세요.")
+    @ValidStorageLocation
     private String location;
 
 }
