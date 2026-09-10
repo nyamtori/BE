@@ -33,6 +33,9 @@ public class RecipeAIService {
     private final UserRepository userRepository;
     private final LikeRepository likeRepository;
 
+    // Recipe.cookTime은 원시 int라, 요청에 조리시간을 지정하지 않은 경우(null) 위해 기본값이 필요하다.
+    private static final int DEFAULT_COOK_TIME_MINUTES = 30;
+
     public Long createRecipeJob(RecipeGenerateRequest request){
         RecipeJob job = new RecipeJob();
         job.setUserId(1L);
@@ -76,7 +79,7 @@ public class RecipeAIService {
             Recipe recipe = new Recipe();
             recipe.setFood(item.title());
             recipe.setRecipe(String.join("\n", item.steps()));
-            recipe.setCookTime(request.getCookTime());
+            recipe.setCookTime(request.getCookTime() != null ? request.getCookTime() : DEFAULT_COOK_TIME_MINUTES);
 
             recipeRepository.save(recipe);
 
