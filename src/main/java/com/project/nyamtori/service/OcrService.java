@@ -102,13 +102,24 @@ public class OcrService {
     public String extractText(BufferedImage image) {
         if (image == null) return null;
 
+        // 여러 페이지 분할 모드로 시도: 11(흩어진 텍스트) → 3(완전 자동) → 6(단일 블록)
+        // 로고/그래픽이 섞인 포장지는 모드에 따라 인식률 차이가 커서 순서대로 시도한다.
+        int[] modes = {11, 3, 6};
+        BufferedImage gray = toGray(image);
+
         try {
-            tesseract.setPageSegMode(3); // 완전 자동 페이지 분할
-            String rawText = tesseract.doOCR(toGray(image));
-            log.info("OCR extractText rawText = [{}]", rawText);
-            return rawText;
-        } catch (TesseractException e) {
-            log.warn("텍스트 OCR 실패: {}", e.getMessage());
+            for (int mode : modes) {
+                try {
+                    tesseract.setPageSegMode(mode);
+                    String rawText = tesseract.doOCR(gray);
+                    log.info("OCR extractText (mode={}) rawText = [{}]", mode, rawText);
+                    if (rawText != null && !rawText.isBlank()) {
+                        return rawText;
+                    }
+                } catch (TesseractException e) {
+                    log.warn("텍스트 OCR 실패 (mode={}): {}", mode, e.getMessage());
+                }
+            }
             return null;
         } finally {
             tesseract.setPageSegMode(11); // 유통기한 인식용 모드로 복원

@@ -22,6 +22,7 @@ public class IngredientMatcher {
         if (containsAny(source, "당근")) return "당근";
         if (containsAny(source, "참치")) return "참치";
         if (containsAny(source, "김치")) return "김치";
+        if (containsAny(source, "라면")) return "라면";
 
         return productName;
     }
