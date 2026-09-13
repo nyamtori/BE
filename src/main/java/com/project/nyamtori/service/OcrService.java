@@ -96,6 +96,26 @@ public class OcrService {
     }
 
     /**
+     * 포장지에 인쇄된 브랜드/제품명 텍스트를 읽어온다 (날짜 인식용 전처리와 달리
+     * 일반 인쇄 글자를 대상으로 하므로 확대/팽창 없이 그레이스케일만 적용).
+     */
+    public String extractText(BufferedImage image) {
+        if (image == null) return null;
+
+        try {
+            tesseract.setPageSegMode(3); // 완전 자동 페이지 분할
+            String rawText = tesseract.doOCR(toGray(image));
+            log.info("OCR extractText rawText = [{}]", rawText);
+            return rawText;
+        } catch (TesseractException e) {
+            log.warn("텍스트 OCR 실패: {}", e.getMessage());
+            return null;
+        } finally {
+            tesseract.setPageSegMode(11); // 유통기한 인식용 모드로 복원
+        }
+    }
+
+    /**
      * 후보 영역: 전체 → 상단 절반 → 하단 절반 → 좌하단 → 우하단
      * 전체 이미지를 가장 먼저 시도 (크롭으로 날짜를 잘라낼 위험 제거)
      */

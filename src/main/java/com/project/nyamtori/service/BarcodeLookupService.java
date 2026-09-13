@@ -57,13 +57,14 @@ public class BarcodeLookupService {
             return lookup(barcode);
         }
 
+        String labelText = ocrService.extractText(productImage);
+        String ingredientName = ingredientMatcher.extract(labelText, null);
+        String storageType = storageTypeResolver.resolve(ingredientName);
+
+        // 유통기한은 찍혀있으면 읽고, 없어도 실패로 취급하지 않는다 (제품 사진만으로도 조회 가능해야 함)
         String expirationDate = ocrService.extractExpirationDate(productImage);
 
-        if (expirationDate == null || expirationDate.isBlank()) {
-            throw new IllegalArgumentException("유통기한을 인식하지 못했습니다. 유통기한 부분만 다시 가까이 촬영해주세요.");
-        }
-
-        return new BarcodeLookupResponse(null, null, null, null, expirationDate, null, null);
+        return new BarcodeLookupResponse(null, null, null, null, expirationDate, ingredientName, storageType);
     }
 
     private BarcodeLookupResponse lookupWithExpirationImage(String barcode, BufferedImage expirationImage) {

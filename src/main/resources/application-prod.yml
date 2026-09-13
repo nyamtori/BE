@@ -83,7 +83,7 @@ gemini:
 
 ocr:
   tessdata-path: ${TESSDATA_PATH:/app/tessdata}
-  language: eng
+  language: kor+eng
 
 app:
   oauth:
