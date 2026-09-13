@@ -1,10 +1,11 @@
 package com.project.nyamtori.domain;
 
-import com.project.nyamtori.domain.User.entity.User;
 import jakarta.persistence.*;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.sql.ConnectionBuilder;
 import java.time.LocalDateTime;
 
 @Entity
@@ -24,8 +25,13 @@ public class Like {
     @JoinColumn(name = "recipe_id")
     private Recipe recipe;
 
-    @Column(columnDefinition = "TEXT")
-    private String note;
-
     private LocalDateTime likedAt;
+
+    @Builder
+    public Like(User user, Recipe recipe) {
+        this.user = user;
+        this.recipe = recipe;
+        this.likedAt = LocalDateTime.now();
+    }
+
 }

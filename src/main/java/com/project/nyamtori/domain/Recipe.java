@@ -1,13 +1,14 @@
 package com.project.nyamtori.domain;
 
 import com.project.nyamtori.common.BaseTimeEntity;
-import com.project.nyamtori.domain.User.entity.User;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Entity
 @Getter
+@Setter
 @NoArgsConstructor
 public class Recipe extends BaseTimeEntity {
     @Id
