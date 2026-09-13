@@ -2,6 +2,7 @@ package com.project.nyamtori.config;
 
 import com.project.nyamtori.auth.OAuthSuccessHandler;
 import com.project.nyamtori.service.CustomOAuth2UserService;
+import jakarta.servlet.DispatcherType;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -32,6 +33,7 @@ public class SecurityConfig {
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
+                        .dispatcherTypeMatchers(DispatcherType.ERROR).permitAll()
                         .requestMatchers(
                         "/swagger-ui/**",
                         "/v3/api-docs/**",
