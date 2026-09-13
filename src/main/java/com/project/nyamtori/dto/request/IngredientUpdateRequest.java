@@ -1,6 +1,7 @@
 package com.project.nyamtori.dto.request;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.project.nyamtori.validation.ValidStorageLocation;
 import lombok.Getter;
 
 import java.time.LocalDate;
@@ -13,5 +14,6 @@ public class IngredientUpdateRequest {
     private String ingredientEtc;
     private String imgUrl;
     private Integer amount;
+    @ValidStorageLocation
     private String location;
 }

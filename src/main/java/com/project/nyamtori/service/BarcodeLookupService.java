@@ -17,8 +17,9 @@ public class BarcodeLookupService {
     private final IngredientMatcher ingredientMatcher;
     private final StorageTypeResolver storageTypeResolver;
     private final OcrService ocrService;
+    private final BarcodeDecoder barcodeDecoder;
 
-    // 바코드만 조회
+    // 바코드 값 문자열만으로 조회 (BarcodeController에서 사용)
     public BarcodeLookupResponse lookup(String barcode) {
         ProductInfo productInfo = findProductInfo(barcode);
 
@@ -40,8 +41,13 @@ public class BarcodeLookupService {
         );
     }
 
-    // 바코드 + 이미지 OCR
-    public BarcodeLookupResponse lookup(String barcode, BufferedImage expirationImage) {
+    // 바코드 사진 + 제품 사진(유통기한 OCR)
+    public BarcodeLookupResponse lookup(BufferedImage barcodeImage, BufferedImage productImage) {
+        String barcode = barcodeDecoder.decode(barcodeImage);
+        return lookupWithExpirationImage(barcode, productImage);
+    }
+
+    private BarcodeLookupResponse lookupWithExpirationImage(String barcode, BufferedImage expirationImage) {
         ProductInfo productInfo = findProductInfo(barcode);
 
         String ingredientName = ingredientMatcher.extract(
