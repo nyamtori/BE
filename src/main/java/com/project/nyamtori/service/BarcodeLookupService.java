@@ -41,10 +41,29 @@ public class BarcodeLookupService {
         );
     }
 
-    // 바코드 사진 + 제품 사진(유통기한 OCR)
+    // 바코드 사진 / 제품 사진(유통기한 OCR) / 둘 다 - 최소 하나는 필요
     public BarcodeLookupResponse lookup(BufferedImage barcodeImage, BufferedImage productImage) {
-        String barcode = barcodeDecoder.decode(barcodeImage);
-        return lookupWithExpirationImage(barcode, productImage);
+        if (barcodeImage == null && productImage == null) {
+            throw new IllegalArgumentException("바코드 사진 또는 제품 사진 중 최소 하나는 필요합니다.");
+        }
+
+        if (barcodeImage != null && productImage != null) {
+            String barcode = barcodeDecoder.decode(barcodeImage);
+            return lookupWithExpirationImage(barcode, productImage);
+        }
+
+        if (barcodeImage != null) {
+            String barcode = barcodeDecoder.decode(barcodeImage);
+            return lookup(barcode);
+        }
+
+        String expirationDate = ocrService.extractExpirationDate(productImage);
+
+        if (expirationDate == null || expirationDate.isBlank()) {
+            throw new IllegalArgumentException("유통기한을 인식하지 못했습니다. 유통기한 부분만 다시 가까이 촬영해주세요.");
+        }
+
+        return new BarcodeLookupResponse(null, null, null, null, expirationDate, null, null);
     }
 
     private BarcodeLookupResponse lookupWithExpirationImage(String barcode, BufferedImage expirationImage) {
