@@ -29,13 +29,18 @@ public class Ingredient extends BaseTimeEntity {
 
     private String location;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id")
+    private User user;
+
     public void applyCreate(
             String ingredientName,
             LocalDate ingredientDate,
             String ingredientEtc,
             String imgUrl,
             int amount,
-            String location
+            String location,
+            User user
     ) {
         this.ingredientName = ingredientName;
         this.ingredientDate = ingredientDate;
@@ -43,6 +48,7 @@ public class Ingredient extends BaseTimeEntity {
         this.imgUrl = imgUrl;
         this.amount = amount;
         this.location = location;
+        this.user = user;
     }
 
     public void update(
