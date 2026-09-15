@@ -33,16 +33,16 @@ public class OAuthSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
         Long userId = Long.valueOf(oAuth2User.getName());
 
         String accessToken = jwtUtil.createAccessToken(userId);
-        String refreshToken = jwtUtil.createRefreshToken(userId);
 
         // SPA는 이 백엔드 origin으로 리다이렉트된 상태라 JSON 응답을 직접 읽을 수 없다.
         // 토큰을 쿼리 파라미터로 실어 프론트엔드 콜백 라우트로 다시 리다이렉트한다.
         String redirectUrl = UriComponentsBuilder.fromUriString(frontendRedirectUri)
                 .queryParam("accessToken", accessToken)
-                .queryParam("refreshToken", refreshToken)
                 .build()
+                .encode()
                 .toUriString();
 
+        clearAuthenticationAttributes(request);
         getRedirectStrategy().sendRedirect(request, response, redirectUrl);
     }
 }
